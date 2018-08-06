@@ -1,3 +1,5 @@
-# Dijkstra
-Input: source, target, myList (a matrix)
-Output: index of path
+Implement some classical problems:
+
+- Dijkstra
+- n-Queens problems
+- 2-SAT CNF

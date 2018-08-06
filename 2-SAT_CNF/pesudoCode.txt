@@ -1,0 +1,121 @@
+main.m
+---------------------------
+% Aim is to estimate the total cost of tree T.
+% - Input: 1) root u; 2) budeget B; 3) repeatition N
+% - Output: the total cost C
+
+root.assig = [];
+root.cost = 0;
+
+node = root;
+B = 2;		% budeget
+N = 10;		% repeatition
+A = [1, -1, 0, 0;
+     0, 1, -1, 0;
+     0, 0, 1, -1];
+[m,n]=size(A);
+
+
+estHist = [];
+for i = 1:N	% repeat N times
+	D = 1; 
+	X = node.assig;	
+	C = node.cost;
+	SX = findNextChild(X,n);			
+	HX = collectionHyperChild(SX);	
+
+	while isempty(SX) ~= 1
+		D = numel(SX)*D/numel(X);	% update product D
+		X = randomChooseHyperChild(HX,B);
+		C = C + sumCost(X)*D/numel(X);
+		SX = findNextChild(X,n);
+		HX = collectionHyperChild(SX);
+	end
+
+	estHist = [estHist; C];
+end
+
+RE = std(estHist)/(mean(estHist)*sqrt(N))
+
+
+sumCost.m
+---------------------------
+function sumCost = sumCost(setX)
+% check all assignments in setX, 
+%	- if x satisfies all clauses are satisfied, C = 1;
+%	- otherwise, C = 0;
+sumCost = 0;
+for i = 1: length(setX)
+	x = setX(i).assig;
+	cost = SAT(x);
+	sumCost = sumCost + cost;
+end
+
+
+randomChooseHyperChild.m
+---------------------------
+function X = randomChooseHyperChild(HX,B)
+% suppose HX = [node1, node2, node3], and budeget B = 2
+tmp_ind = randperm(length(HX);
+index = sort(tmp_ind(1:B));
+X = HX(index);
+
+
+findNextChild.m
+---------------------------
+function SX = findNextChild(setX,m)
+% find all child node from X
+SX = [];	% to store all child nodes
+if length(setX(i).assig) <= m-1
+	for i=1:numel(setX)
+		x = setX(i).assig;
+		child1 = [x,0];		
+		SX = [SX; child1];
+		child2 =[x, 1];
+		SX = [SX; child2];
+	end
+else
+	SX = [];
+end
+
+collectionHyperChild.m
+---------------------------
+function HX = collectionHyperChild(SX)
+% Aim is to find collection of hyper-child
+% In practice, no need to enumerate all possible collections
+HX = SX
+
+
+SAT.m
+-----------------------
+function flg = SAT(x)
+% This example is 2-SAT CNF problem as follows,
+% 	C1 AND C2 AND ... AND C_{n-1}, where C_i = x_j OR ~x_{j+1}
+% Construct cluase matrix A=(a_ij), for given clause i
+%	- a_ij = 1, when x_j \in C_i
+%	- a_ij = 0, when x_j not \in C_i, and ~x_j not \in C_i
+%	- a_ij = -1, when ~x_j \in C_i
+% For example, n = 4
+% Input:
+%	- x: candidate assignment
+% Output:
+%	- flg: 1, satisfy all cluases; 0, not satisfy all clauses.
+
+A = [1, -1, 0, 0;
+	 0, 1, -1, 0;
+	 0, 0, 1, -1];
+[m,n]=size(A);
+
+x = [0 0 0 0]; % for example 
+
+Cmatrix = [zeros(m,1), repmat((2*x-1),m,1).*A];
+tmp = cumsum(max(Cmatrix,[],2))
+satisfyClause = tmp(m,1);
+
+if length(find(satisfyClause == 3)) == 1
+	flg = 1;	% solution found
+    disp('Satisfy all clauses. Solution found!')
+else
+	flg = 0;	% solution not found
+    disp('Not satisfy all clause.')
+end

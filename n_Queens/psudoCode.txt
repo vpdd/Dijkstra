@@ -1,0 +1,87 @@
+## main.m
+-------------------------------
+% DFS for 8-queens Problem
+node.placement = [0,0,0,0,0,0,0,0];
+node.parentNode = [];
+node.childNodes = [];
+node.visit = 0;          % 0 is unvisited, 1 is visited
+node.level = 0;			 % use for working row
+
+V = [];          % use for visited set
+S = node;     % use for stack
+while S is not empty
+	node = S(length(S));
+	S = S(1:length(S)-1);
+	if node.visit == 0
+		node.visit = 1;
+		node.childNodes = FindChildNodes(node);	% return a set of childNodes
+		if node.childNodes is not empty
+			S = [S; node.childNodes(i)];		% add childNodes to stack   
+		else
+			flg = CheckFinalSolution(node);	% check solution, if it's optimal, print it
+		end
+	end
+
+end
+
+
+## FindChildNodes.m
+---------------------------------
+function nodeSet = FindChildNodes(node)
+
+board = zeros(8,8);	% translate 'node.placement' to board
+
+
+n = size(board,1);
+row_new = node.level + 1;	% to find all possible position in next level
+nodeSet = [];
+% start at new row, 'row_new'. Try to find out all possible locations (or childNodes).
+for col=1:n
+	node_ = node;
+	if QueenSafe(row_new, col, board) == 0
+		node_.placement(col) = col;
+		node_.parentNode = node;
+		node_.childNodes = [];
+		node_.visit = 0;
+		node_.level = node.level + 1;
+		nodeSet = [nodeSet; node_];	
+	end
+end
+
+
+
+
+## QueenSafe.m
+--------------------------------
+function flg = QueenSafe(row, col, board)
+% flg = 0, safe; flg = 1, unsafe
+n = size(board,1); flg = 0;
+
+% 1. check all row and all col
+for i=1:n
+	if(board(row,i) has a queen || board(i,col) has a queen)
+		flg = 1;
+		return
+	end	
+end
+% 2. check all NW to SE direction diagonal
+reset = min(row,col) - 1;
+for i = (row-reset):1:n
+	for j = (row-reset):1:n
+		if (board[i][j] has a queen)
+			flg = 1;
+			return;
+		end
+	end
+end
+% 3. check all SW to NE direction diagonal
+reset = min(row,col) - 1;
+for i = (row-reset):1:n
+	for j = (row+reset):-1:0
+		if (board[i][j] has a queen)
+			flg = 1;
+			return;
+		end
+	end
+end
+
